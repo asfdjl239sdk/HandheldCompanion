@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Timers;
 
 namespace HandheldCompanion.Managers;
 
@@ -37,20 +38,20 @@ public class LayoutManager : IManager
 
     private const string desktopLayoutFile = "desktop";
 
-    public string LayoutsPath;
     public string TemplatesPath;
 
     public FileSystemWatcher layoutWatcher { get; set; }
+    private Timer layoutTimer;
 
     public LayoutManager()
     {
         // initialize path(s)
-        LayoutsPath = Path.Combine(App.SettingsPath, "layouts");
+        ManagerPath = Path.Combine(App.SettingsPath, "layouts");
         TemplatesPath = Path.Combine(App.SettingsPath, "templates");
 
         // create path(s)
-        if (!Directory.Exists(LayoutsPath))
-            Directory.CreateDirectory(LayoutsPath);
+        if (!Directory.Exists(ManagerPath))
+            Directory.CreateDirectory(ManagerPath);
         if (!Directory.Exists(TemplatesPath))
             Directory.CreateDirectory(TemplatesPath);
 
@@ -67,6 +68,10 @@ public class LayoutManager : IManager
             Filter = "*.json",
             NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite,
         };
+
+        // prepare timer
+        layoutTimer = new(100) { AutoReset = false };
+        layoutTimer.Elapsed += LayoutTimer_Elapsed;
     }
 
     public override void Start()
@@ -85,7 +90,7 @@ public class LayoutManager : IManager
         foreach (LayoutTemplate layoutTemplate in Templates)
             Updated?.Invoke(layoutTemplate);
 
-        string desktopFile = Path.Combine(LayoutsPath, $"{desktopLayoutFile}.json");
+        string desktopFile = Path.Combine(ManagerPath, $"{desktopLayoutFile}.json");
         desktopLayout = ProcessLayout(desktopFile);
         if (desktopLayout is null)
         {
@@ -101,7 +106,7 @@ public class LayoutManager : IManager
         layoutWatcher.Changed += LayoutWatcher_Template;
 
         // manage events
-        ManagerFactory.profileManager.Applied += ProfileManager_Applied;
+        ManagerFactory.processManager.ForegroundChanged += ProcessManager_ForegroundChanged;
         UIGamepad.GotFocus += GamepadFocusManager_FocusChanged;
         UIGamepad.LostFocus += GamepadFocusManager_FocusChanged;
 
@@ -142,6 +147,11 @@ public class LayoutManager : IManager
         base.Start();
     }
 
+    private void ProcessManager_ForegroundChanged(ProcessEx? processEx, ProcessEx? backgroundEx, ProcessEx.ProcessFilter filter)
+    {
+        CheckProfileLayout();
+    }
+
     private void GamepadFocusManager_FocusChanged(string Name)
     {
         CheckProfileLayout();
@@ -152,6 +162,9 @@ public class LayoutManager : IManager
         // ref
         defaultLayout = ManagerFactory.profileManager.GetDefault().Layout;
         defaultLayout.Updated += DefaultLayout_Updated;
+
+        // manage events
+        ManagerFactory.profileManager.Applied += ProfileManager_Applied;
 
         ProfileManager_Applied(ManagerFactory.profileManager.GetCurrent(), UpdateSource.Background);
     }
@@ -189,6 +202,9 @@ public class LayoutManager : IManager
 
         base.PrepareStop();
 
+        // stop timer(s)
+        layoutTimer.Stop();
+
         // manage desktop layout events
         desktopLayout.Updated -= DesktopLayout_Updated;
 
@@ -203,6 +219,7 @@ public class LayoutManager : IManager
         ManagerFactory.settingsManager.Initialized -= SettingsManager_Initialized;
         UIGamepad.GotFocus -= GamepadFocusManager_FocusChanged;
         UIGamepad.LostFocus -= GamepadFocusManager_FocusChanged;
+        ManagerFactory.processManager.ForegroundChanged -= ProcessManager_ForegroundChanged;
 
         base.Stop();
     }
@@ -300,7 +317,7 @@ public class LayoutManager : IManager
         UpdateInherit();
     }
 
-    private void CheckProfileLayout()
+    private void LayoutTimer_Elapsed(object? sender, ElapsedEventArgs e)
     {
         LayoutModes layoutMode = (LayoutModes)ManagerFactory.settingsManager.GetInt("LayoutMode");
 
@@ -320,10 +337,16 @@ public class LayoutManager : IManager
             }
             else
             {
-                ProcessEx processEx = ProcessManager.GetForegroundProcess();
-                SetActiveLayout(processEx?.IsGame() == true ? profileLayout : desktopLayout);
+                ProcessEx processEx = ProcessManager.GetCurrent();
+                SetActiveLayout((processEx == null || processEx.IsGame() || processEx.Filter == ProcessEx.ProcessFilter.HandheldCompanion) ? profileLayout : desktopLayout);
             }
         }
+    }
+
+    private void CheckProfileLayout()
+    {
+        layoutTimer.Stop();
+        layoutTimer.Start();
     }
 
     public Layout GetCurrent()
@@ -343,7 +366,7 @@ public class LayoutManager : IManager
             TypeNameHandling = TypeNameHandling.All
         });
 
-        fileName = Path.Combine(LayoutsPath, $"{fileName}.json");
+        fileName = Path.Combine(ManagerPath, $"{fileName}.json");
         if (FileUtils.IsFileWritable(fileName))
             File.WriteAllText(fileName, jsonString);
     }
@@ -478,8 +501,12 @@ public class LayoutManager : IManager
                 bool value = buttonState.Value;
 
                 // skip, if not mapped
+                // we might have to keep fake buttons
                 if (!currentLayout.ButtonLayout.TryGetValue(button, out List<IActions> actions))
+                {
+                    outputState.ButtonState[button] = value;
                     continue;
+                }
 
                 foreach (IActions action in actions)
                 {
@@ -509,6 +536,19 @@ public class LayoutManager : IManager
                             {
                                 MouseActions mAction = action as MouseActions;
                                 mAction.Execute(button, value, shiftSlot);
+                            }
+                            break;
+
+                        case ActionType.Trigger:
+                            {
+                                TriggerActions tAction = action as TriggerActions;
+                                tAction.Execute(button, value, shiftSlot);
+
+                                // read output axis
+                                AxisLayout OutLayout = AxisLayout.Layouts[tAction.Axis];
+                                AxisFlags OutAxisY = OutLayout.GetAxisFlags('Y');
+
+                                outputState.AxisState[OutAxisY] = (byte)Math.Clamp(outputState.AxisState[OutAxisY] + tAction.GetValue(), byte.MinValue, byte.MaxValue);
                             }
                             break;
                     }
@@ -627,13 +667,13 @@ public class LayoutManager : IManager
                         case ActionType.Trigger:
                             {
                                 TriggerActions tAction = action as TriggerActions;
-                                tAction.Execute(InAxisY, (short)InLayout.vector.Y, shiftSlot);
+                                tAction.Execute(InAxisY, (byte)InLayout.vector.Y, shiftSlot);
 
                                 // read output axis
                                 AxisLayout OutLayout = AxisLayout.Layouts[tAction.Axis];
                                 AxisFlags OutAxisY = OutLayout.GetAxisFlags('Y');
 
-                                outputState.AxisState[OutAxisY] = (short)Math.Clamp(outputState.AxisState[OutAxisY] + tAction.GetValue(), short.MinValue, short.MaxValue);
+                                outputState.AxisState[OutAxisY] = (byte)Math.Clamp(outputState.AxisState[OutAxisY] + tAction.GetValue(), byte.MinValue, byte.MaxValue);
                             }
                             break;
 

@@ -7,6 +7,7 @@ using HandheldCompanion.Utils;
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using Timer = System.Timers.Timer;
@@ -98,7 +99,7 @@ public static class PerformanceManager
 
     private static bool IsInitialized;
     public static event InitializedEventHandler Initialized;
-    public delegate void InitializedEventHandler();
+    public delegate void InitializedEventHandler(bool CanChangeTDP, bool CanChangeGPU);
 
     static PerformanceManager()
     {
@@ -126,17 +127,6 @@ public static class PerformanceManager
 
         // initialize processor
         processor = Processor.GetCurrent();
-        if (processor is not null)
-        {
-            processor.StatusChanged += Processor_StatusChanged;
-            processor.Initialize();
-        }
-        else
-            ProcessorStatusChanged?.Invoke(false, false);
-
-        // manage events
-        ManagerFactory.powerProfileManager.Applied += PowerProfileManager_Applied;
-        ManagerFactory.powerProfileManager.Discarded += PowerProfileManager_Discarded;
 
         // raise events
         switch (ManagerFactory.powerProfileManager.Status)
@@ -162,13 +152,17 @@ public static class PerformanceManager
         }
 
         IsInitialized = true;
-        Initialized?.Invoke();
+        Initialized?.Invoke(processor?.CanChangeTDP ?? false, processor?.CanChangeGPU ?? false);
 
         LogManager.LogInformation("{0} has started", "PerformanceManager");
     }
 
     private static void QueryPowerProfile()
     {
+        // manage events
+        ManagerFactory.powerProfileManager.Applied += PowerProfileManager_Applied;
+        ManagerFactory.powerProfileManager.Discarded += PowerProfileManager_Discarded;
+
         PowerProfileManager_Applied(ManagerFactory.powerProfileManager.GetCurrent(), UpdateSource.Background);
     }
 
@@ -199,10 +193,7 @@ public static class PerformanceManager
 
         // halt processor
         if (processor is not null && processor.IsInitialized)
-        {
-            processor.StatusChanged -= Processor_StatusChanged;
             processor.Stop();
-        }
 
         // halt watchdogs
         autotdpWatchdog.Stop();
@@ -646,7 +637,7 @@ public static class PerformanceManager
         }
     }
 
-    private static async void tdpWatchdog_Elapsed(object? sender, ElapsedEventArgs e)
+    private static void tdpWatchdog_Elapsed(object? sender, ElapsedEventArgs e)
     {
         if (processor is null || !processor.IsInitialized)
             return;
@@ -680,7 +671,7 @@ public static class PerformanceManager
                     if (ReadTDP != TDP)
                         RequestTDP((PowerType)idx, TDP, true);
 
-                    await Task.Delay(20).ConfigureAwait(false); // Avoid blocking the synchronization context
+                    Thread.Sleep(200);
                 }
 
                 // are we done ?
@@ -876,7 +867,7 @@ public static class PerformanceManager
         for (int idx = (int)PowerType.Slow; idx <= (int)PowerType.Fast; idx++)
         {
             RequestTDP((PowerType)idx, values[idx], immediate);
-            await Task.Delay(20).ConfigureAwait(false); // Avoid blocking the synchronization context
+            await Task.Delay(200).ConfigureAwait(false); // Avoid blocking the synchronization context
         }
     }
 
@@ -907,13 +898,7 @@ public static class PerformanceManager
 
         // immediately apply
         if (immediate)
-        {
-            int result = 0;
-            processor.SetGPUClock(StoredGfxClock, ref result);
-
-            if (result != 0)
-                LogManager.LogWarning("Failed to set requested GPU clock: {0}, error code: {1}", StoredGfxClock, result);
-        }
+            processor.SetGPUClock(StoredGfxClock);
     }
 
     private static void RequestPowerMode(Guid guid)
@@ -1131,36 +1116,19 @@ public static class PerformanceManager
     #region events
 
     public static event LimitChangedHandler PowerLimitChanged;
-
     public delegate void LimitChangedHandler(PowerType type, int limit);
 
     public static event ValueChangedHandler PowerValueChanged;
-
     public delegate void ValueChangedHandler(PowerType type, float value);
 
-    public static event StatusChangedHandler ProcessorStatusChanged;
-
-    public delegate void StatusChangedHandler(bool CanChangeTDP, bool CanChangeGPU);
-
     public static event PowerModeChangedEventHandler PowerModeChanged;
-
     public delegate void PowerModeChangedEventHandler(int idx);
 
     public static event PerfBoostModeChangedEventHandler PerfBoostModeChanged;
-
     public delegate void PerfBoostModeChangedEventHandler(uint value);
 
     public static event EPPChangedEventHandler EPPChanged;
-
     public delegate void EPPChangedEventHandler(uint EPP);
-
-    #endregion
-
-    #region events
-    private static void Processor_StatusChanged(bool CanChangeTDP, bool CanChangeGPU)
-    {
-        ProcessorStatusChanged?.Invoke(CanChangeTDP, CanChangeGPU);
-    }
 
     #endregion
 }

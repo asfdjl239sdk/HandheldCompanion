@@ -230,7 +230,7 @@ public class LegionGo : IDevice
         Capabilities |= DeviceCapabilities.DynamicLighting;
         Capabilities |= DeviceCapabilities.DynamicLightingBrightness;
         Capabilities |= DeviceCapabilities.BatteryChargeLimit;
-        Capabilities |= DeviceCapabilities.OEMPower;
+        Capabilities |= DeviceCapabilities.OEMCPU;
 
         // battery bypass settings
         BatteryBypassMin = 80;
@@ -307,7 +307,6 @@ public class LegionGo : IDevice
             return false;
 
         // manage events
-        ManagerFactory.powerProfileManager.Applied += PowerProfileManager_Applied;
         ControllerManager.ControllerPlugged += ControllerManager_ControllerPlugged;
         ControllerManager.ControllerUnplugged += ControllerManager_ControllerUnplugged;
 
@@ -320,17 +319,6 @@ public class LegionGo : IDevice
                 break;
             case ManagerStatus.Initialized:
                 QueryPowerProfile();
-                break;
-        }
-
-        switch (ManagerFactory.settingsManager.Status)
-        {
-            default:
-            case ManagerStatus.Initializing:
-                ManagerFactory.settingsManager.Initialized += SettingsManager_Initialized;
-                break;
-            case ManagerStatus.Initialized:
-                QuerySettings();
                 break;
         }
 
@@ -388,6 +376,9 @@ public class LegionGo : IDevice
 
     private void QueryPowerProfile()
     {
+        // manage events
+        ManagerFactory.powerProfileManager.Applied += PowerProfileManager_Applied;
+
         PowerProfileManager_Applied(ManagerFactory.powerProfileManager.GetCurrent(), UpdateSource.Background);
     }
 
@@ -396,18 +387,24 @@ public class LegionGo : IDevice
         QueryPowerProfile();
     }
 
-    private void SettingsManager_Initialized()
+    protected override void QuerySettings()
     {
-        QuerySettings();
-    }
-
-    private void QuerySettings()
-    {
-        // manage events
-        ManagerFactory.settingsManager.SettingValueChanged += SettingsManager_SettingValueChanged;
-
         // raise events
         SettingsManager_SettingValueChanged("BatteryChargeLimit", ManagerFactory.settingsManager.GetBoolean("BatteryChargeLimit"), false);
+
+        base.QuerySettings();
+    }
+
+    protected override void SettingsManager_SettingValueChanged(string name, object value, bool temporary)
+    {
+        switch (name)
+        {
+            case "BatteryChargeLimit":
+                SetBatteryChargeLimit(Convert.ToBoolean(value));
+                break;
+        }
+
+        base.SettingsManager_SettingValueChanged(name, value, temporary);
     }
 
     public override void Close()
@@ -425,8 +422,6 @@ public class LegionGo : IDevice
 
         ManagerFactory.powerProfileManager.Applied -= PowerProfileManager_Applied;
         ManagerFactory.powerProfileManager.Initialized -= PowerProfileManager_Initialized;
-        ManagerFactory.settingsManager.SettingValueChanged -= SettingsManager_SettingValueChanged;
-        ManagerFactory.settingsManager.Initialized -= SettingsManager_Initialized;
         ControllerManager.ControllerPlugged -= ControllerManager_ControllerPlugged;
         ControllerManager.ControllerUnplugged -= ControllerManager_ControllerUnplugged;
 
@@ -442,7 +437,6 @@ public class LegionGo : IDevice
 
         return true;
     }
-
 
     private void PowerProfileManager_Applied(PowerProfile profile, UpdateSource source)
     {
@@ -591,15 +585,5 @@ public class LegionGo : IDevice
         }
 
         return defaultGlyph;
-    }
-
-    private void SettingsManager_SettingValueChanged(string name, object value, bool temporary)
-    {
-        switch (name)
-        {
-            case "BatteryChargeLimit":
-                SetBatteryChargeLimit(Convert.ToBoolean(value));
-                break;
-        }
     }
 }

@@ -19,17 +19,17 @@
     <ikw:SimpleStackPanel Spacing="12" Visibility="{Binding IsEnabled, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter}}">
 
         <!--  LEFT JOYSTICK  -->
-        <ikw:SimpleStackPanel Spacing="6" Visibility="{Binding IsLeftThumbEnabled, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <ikw:SimpleStackPanel Spacing="3" Visibility="{Binding IsLeftThumbEnabled, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock Style="{StaticResource BaseTextBlockStyle}" Text="{l:Static resx:Resources.JoystickPage_Joystick_Left}" />
-            <ui:ItemsRepeater ItemTemplate="{StaticResource AxisStackTemplate}" ItemsSource="{Binding LeftThumbAxisMappings}" />
-            <ui:ItemsRepeater ItemTemplate="{StaticResource ButtonStackTemplate}" ItemsSource="{Binding LeftThumbMappings}" />
+            <ItemsControl ItemTemplate="{StaticResource AxisStackTemplate}" ItemsSource="{Binding LeftThumbAxisMappings}" />
+            <ItemsControl ItemTemplate="{StaticResource ButtonStackTemplate}" ItemsSource="{Binding LeftThumbMappings}" />
         </ikw:SimpleStackPanel>
 
         <!--  RIGHT JOYSTICK  -->
-        <ikw:SimpleStackPanel Spacing="6" Visibility="{Binding IsRightThumbEnabled, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <ikw:SimpleStackPanel Spacing="3" Visibility="{Binding IsRightThumbEnabled, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter}}">
             <TextBlock Style="{StaticResource BaseTextBlockStyle}" Text="{l:Static resx:Resources.JoystickPage_Joystick_Right}" />
-            <ui:ItemsRepeater ItemTemplate="{StaticResource AxisStackTemplate}" ItemsSource="{Binding RightThumbAxisMappings}" />
-            <ui:ItemsRepeater ItemTemplate="{StaticResource ButtonStackTemplate}" ItemsSource="{Binding RightThumbMappings}" />
+            <ItemsControl ItemTemplate="{StaticResource AxisStackTemplate}" ItemsSource="{Binding RightThumbAxisMappings}" />
+            <ItemsControl ItemTemplate="{StaticResource ButtonStackTemplate}" ItemsSource="{Binding RightThumbMappings}" />
         </ikw:SimpleStackPanel>
 
     </ikw:SimpleStackPanel>

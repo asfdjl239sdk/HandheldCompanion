@@ -1,4 +1,6 @@
-﻿using HandheldCompanion.Shared;
+﻿using HandheldCompanion.Devices;
+using HandheldCompanion.Managers;
+using HandheldCompanion.Shared;
 using System.Timers;
 
 namespace HandheldCompanion.Processors;
@@ -19,6 +21,11 @@ public class Processor
     private static string Manufacturer;
 
     protected readonly Timer updateTimer = new() { Interval = 3000, AutoReset = true };
+
+    protected bool UseOEM => (TDPMethod)ManagerFactory.settingsManager.GetInt("ConfigurableTDPMethod") == TDPMethod.OEM;
+
+    protected bool HasOEMCPU => IDevice.GetCurrent().Capabilities.HasFlag(DeviceCapabilities.OEMCPU);
+    protected bool HasOEMGPU => IDevice.GetCurrent().Capabilities.HasFlag(DeviceCapabilities.OEMGPU);
 
     public bool CanChangeTDP, CanChangeGPU;
     protected object updateLock = new();
@@ -54,22 +61,15 @@ public class Processor
         return processor;
     }
 
-    public virtual void Initialize()
-    {
-        StatusChanged?.Invoke(CanChangeTDP, CanChangeGPU);
-        Initialized?.Invoke(this);
-    }
-
     public virtual void Stop()
-    {
-    }
+    { }
 
     public virtual void SetTDPLimit(PowerType type, double limit, bool immediate = false, int result = 0)
     {
         LogManager.LogDebug("User requested {0} TDP limit: {1}, error code: {2}", type, (uint)limit, result);
     }
 
-    public virtual void SetGPUClock(double clock, ref int result)
+    public virtual void SetGPUClock(double clock, int result = 0)
     {
         /*
          * #define ADJ_ERR_FAM_UNSUPPORTED      -1
@@ -81,16 +81,4 @@ public class Processor
 
         LogManager.LogDebug("User requested GPU clock: {0}, error code: {1}", clock, result);
     }
-
-    #region events
-
-    public event StatusChangedHandler StatusChanged;
-
-    public delegate void StatusChangedHandler(bool CanChangeTDP, bool CanChangeGPU);
-
-    public event InitializedEventHandler Initialized;
-
-    public delegate void InitializedEventHandler(Processor processor);
-
-    #endregion
 }

@@ -1,5 +1,6 @@
 ﻿using HandheldCompanion.Devices;
 using HandheldCompanion.Managers;
+using HandheldCompanion.Processors;
 using HandheldCompanion.Watchers;
 using System;
 using System.Windows;
@@ -37,7 +38,7 @@ namespace HandheldCompanion.ViewModels
         #endregion
 
         #region Power options
-        public bool HasWMIMethod => CurrentDevice.Capabilities.HasFlag(DeviceCapabilities.OEMPower);
+        public bool HasWMIMethod => CurrentDevice.Capabilities.HasFlag(DeviceCapabilities.OEMCPU);
         public int ConfigurableTDPMethod
         {
             get
@@ -67,6 +68,60 @@ namespace HandheldCompanion.ViewModels
                 {
                     ManagerFactory.settingsManager.SetProperty("MSIClawControllerIndex", value);
                     OnPropertyChanged(nameof(ClawControllerIndex));
+                }
+            }
+        }
+
+        public bool HasOverBoost => CurrentDevice is ClawA1M clawA1M && clawA1M.HasOverBoost();
+
+        public bool ClawOverBoost
+        {
+            get
+            {
+                return CurrentDevice is ClawA1M clawA1M && clawA1M.GetOverBoost();
+            }
+            set
+            {
+                if (value != ClawOverBoost)
+                {
+                    if (CurrentDevice is ClawA1M clawA1M)
+                        clawA1M.SetOverBoost(value);
+
+                    OnPropertyChanged(nameof(ClawOverBoost));
+                }
+            }
+        }
+
+        public double leftTriggerDeadzoneValue = 100;
+        public double LeftTriggerDeadzoneValue
+        {
+            get
+            {
+                return leftTriggerDeadzoneValue;
+            }
+            set
+            {
+                if (value != leftTriggerDeadzoneValue)
+                {
+                    leftTriggerDeadzoneValue = value;
+                    OnPropertyChanged(nameof(LeftTriggerDeadzoneValue));
+                }
+            }
+        }
+
+        public double rightTriggerDeadzoneValue = 100;
+        public double RightTriggerDeadzoneValue
+        {
+            get
+            {
+                return rightTriggerDeadzoneValue;
+            }
+            set
+            {
+                if (value != rightTriggerDeadzoneValue)
+                {
+                    rightTriggerDeadzoneValue = value;
+                    OnPropertyChanged(nameof(RightTriggerDeadzoneValue));
                 }
             }
         }
@@ -134,12 +189,15 @@ namespace HandheldCompanion.ViewModels
         public DevicePageViewModel()
         {
             // settings watcher
-            coreIsolationWatcher.StatusChanged += CoreIsolationWatcher_StatusChanged;
-            coreIsolationWatcher.Start();
+            if (Processor.GetCurrent() is IntelProcessor)
+            {
+                coreIsolationWatcher.StatusChanged += CoreIsolationWatcher_StatusChanged;
+                coreIsolationWatcher.Start();
+            }
 
             // manufacturer watcher
             IDevice device = IDevice.GetCurrent();
-            if (device is ClawA1M || device is Claw8)
+            if (device is ClawA1M || device is ClawA2VM)
                 manufacturerWatcher = new ClawCenterWatcher();
             else if (device is LegionGo)
                 manufacturerWatcher = new LegionSpaceWatcher();

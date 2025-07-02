@@ -160,6 +160,19 @@ namespace HandheldCompanion.ViewModels
             }
         }
 
+        public float TriggerOutput
+        {
+            get => Action is not null ? Action.motionThreshold : 0;
+            set
+            {
+                if (Action is not null && value != TriggerOutput)
+                {
+                    Action.motionThreshold = value;
+                    OnPropertyChanged(nameof(TriggerOutput));
+                }
+            }
+        }
+
         public bool Toggle
         {
             get => Action is not null && Action.Toggle;
@@ -301,15 +314,44 @@ namespace HandheldCompanion.ViewModels
                 Targets.ReplaceWith(targets);
                 SelectedTarget = matchingTargetVm ?? Targets.First();
             }
+            else if (actionType == ActionType.Trigger)
+            {
+                if (Action is null || Action is not TriggerActions)
+                    Action = new TriggerActions() { motionThreshold = 125 };
+
+                MappingTargetViewModel? matchingTargetVm = null;
+                foreach (var axis in controller.GetTargetTriggers())
+                {
+                    var mappingTargetVm = new MappingTargetViewModel
+                    {
+                        Tag = axis,
+                        Content = controller.GetAxisName(axis)
+                    };
+                    targets.Add(mappingTargetVm);
+
+                    if (axis == ((TriggerActions)Action).Axis)
+                        matchingTargetVm = mappingTargetVm;
+                }
+
+                Targets.ReplaceWith(targets);
+                SelectedTarget = matchingTargetVm ?? Targets.First();
+            }
             else if (actionType == ActionType.Shift)
             {
                 if (Action is null || Action is not ShiftActions)
                     Action = new ShiftActions(ShiftSlot.ShiftA);
 
                 MappingTargetViewModel? matchingTargetVm = null;
-                foreach (var shiftSlot in Enum.GetValues<ShiftSlot>())
+                foreach (ShiftSlot shiftSlot in Enum.GetValues<ShiftSlot>())
                 {
-                    var mappingTargetVm = new MappingTargetViewModel
+                    switch (shiftSlot)
+                    {
+                        case ShiftSlot.None:
+                        case ShiftSlot.Any:
+                            continue;
+                    }
+
+                    MappingTargetViewModel mappingTargetVm = new MappingTargetViewModel
                     {
                         Tag = shiftSlot,
                         Content = EnumUtils.GetDescriptionFromEnumValue(shiftSlot)
@@ -359,6 +401,10 @@ namespace HandheldCompanion.ViewModels
 
                 case ActionType.Shift:
                     ((ShiftActions)Action).ShiftSlot = (ShiftSlot)SelectedTarget.Tag;
+                    break;
+
+                case ActionType.Trigger:
+                    ((TriggerActions)Action).Axis = (AxisLayoutFlags)SelectedTarget.Tag;
                     break;
             }
         }

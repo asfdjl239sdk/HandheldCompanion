@@ -66,7 +66,7 @@ public class XInputController : IController
 
     public virtual void UpdateInputs(long ticks, float delta, bool commit)
     {
-        if (Inputs is null || IsDisposing || IsDisposed)
+        if (Inputs is null || IsBusy || !IsPlugged || IsDisposing || IsDisposed)
             return;
 
         ButtonState.Overwrite(InjectedButtons, Inputs.ButtonState);
@@ -108,20 +108,10 @@ public class XInputController : IController
                 Inputs.ButtonState[ButtonFlags.DPadRight] = Gamepad.Buttons.HasFlag(GamepadButtonFlags.DPadRight);
 
                 // Left Stick
-                Inputs.ButtonState[ButtonFlags.LeftStickLeft] = Gamepad.LeftThumbX < -Gamepad.LeftThumbDeadZone;
-                Inputs.ButtonState[ButtonFlags.LeftStickRight] = Gamepad.LeftThumbX > Gamepad.LeftThumbDeadZone;
-                Inputs.ButtonState[ButtonFlags.LeftStickDown] = Gamepad.LeftThumbY < -Gamepad.LeftThumbDeadZone;
-                Inputs.ButtonState[ButtonFlags.LeftStickUp] = Gamepad.LeftThumbY > Gamepad.LeftThumbDeadZone;
-
                 Inputs.AxisState[AxisFlags.LeftStickX] = Gamepad.LeftThumbX;
                 Inputs.AxisState[AxisFlags.LeftStickY] = Gamepad.LeftThumbY;
 
                 // Right Stick
-                Inputs.ButtonState[ButtonFlags.RightStickLeft] = Gamepad.RightThumbX < -Gamepad.RightThumbDeadZone;
-                Inputs.ButtonState[ButtonFlags.RightStickRight] = Gamepad.RightThumbX > Gamepad.RightThumbDeadZone;
-                Inputs.ButtonState[ButtonFlags.RightStickDown] = Gamepad.RightThumbY < -Gamepad.RightThumbDeadZone;
-                Inputs.ButtonState[ButtonFlags.RightStickUp] = Gamepad.RightThumbY > Gamepad.RightThumbDeadZone;
-
                 Inputs.AxisState[AxisFlags.RightStickX] = Gamepad.RightThumbX;
                 Inputs.AxisState[AxisFlags.RightStickY] = Gamepad.RightThumbY;
 

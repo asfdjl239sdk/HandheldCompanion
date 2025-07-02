@@ -17,16 +17,15 @@ using System.Windows.Media;
 
 namespace HandheldCompanion.Misc;
 
-public class ProcessEx : IDisposable
+public class ProcessEx : IDisposable, ICloneable
 {
     #region filters
     public enum ProcessFilter
     {
         Allowed = 0,
         Restricted = 1,
-        Ignored = 2,
-        HandheldCompanion = 3,
-        Desktop = 4
+        HandheldCompanion = 2,
+        Desktop = 3
     }
 
     private static readonly string[] launcherExecutables = new[]
@@ -256,7 +255,7 @@ public class ProcessEx : IDisposable
         Executable = executable;
         Filter = filter;
 
-        Refresh();
+        Refresh(true);
         GetMainThread();
 
         // update main thread when disposed
@@ -283,7 +282,9 @@ public class ProcessEx : IDisposable
 
         switch (Filter)
         {
-            case ProcessFilter.Desktop:
+            case ProcessFilter.Allowed:
+                break;
+            default:
                 return false;
         }
 
@@ -373,7 +374,7 @@ public class ProcessEx : IDisposable
         if (!ProcessWindows.TryGetValue(hwnd, out var window))
         {
             // create new window object
-            window = new(automationElement, primary);
+            window = new(this, automationElement, primary);
             window.Closed += Window_Closed;
 
             if (string.IsNullOrEmpty(window.Name))
@@ -428,7 +429,6 @@ public class ProcessEx : IDisposable
     {
         get
         {
-            Process.Refresh();
             GetMainThread();
 
             if (MainThread?.ThreadState == ThreadState.Wait && MainThread?.WaitReason == ThreadWaitReason.Suspended)
@@ -459,12 +459,17 @@ public class ProcessEx : IDisposable
         catch { }
     }
 
-    public void Refresh()
+    public void Refresh(bool force)
     {
         try
         {
             if (Process is null || Process.HasExited)
                 return;
+
+            if (ProcessWindows.IsEmpty && !force)
+                return;
+
+            Process.Refresh();
 
             if (MainThread is null)
                 return;
@@ -549,7 +554,7 @@ public class ProcessEx : IDisposable
                 {
                     if (key != null)
                     {
-                        List<string> values = ["~"]; ;
+                        List<string> values = ["~"];
                         string valueStr = (string)key.GetValue(Path);
 
                         if (!string.IsNullOrEmpty(valueStr))
@@ -585,6 +590,9 @@ public class ProcessEx : IDisposable
             {
                 try
                 {
+                    if (thread.ThreadState == ThreadState.Terminated)
+                        continue;
+
                     if (thread.StartTime < startTime)
                     {
                         startTime = thread.StartTime;
@@ -639,5 +647,10 @@ public class ProcessEx : IDisposable
         }
 
         _disposed = true;
+    }
+
+    public object Clone()
+    {
+        return this.MemberwiseClone();
     }
 }
