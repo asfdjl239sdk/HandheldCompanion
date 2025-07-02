@@ -12,6 +12,7 @@ namespace HandheldCompanion.Devices.AYANEO
             ProductIllustration = "device_aya_3";
             ProductModel = "AYANEO 3";
 
+            // https://www.amd.com/en/products/apu/ai-300-series/amd-ryzen-ai-9-hx-370
             nTDP = new double[] { 15, 20, 28 };
             cTDP = new double[] { 3, 54 };
             GfxClock = new double[] { 100, 2900 };
@@ -34,14 +35,14 @@ namespace HandheldCompanion.Devices.AYANEO
                 ButtonFlags.OEM2));
 
             this.OEMChords.Add(new KeyboardChord("Custom Key Top Right",
-                new List<KeyCode> { KeyCode.F22 },
-                new List<KeyCode> { KeyCode.F22 },
+                new List<KeyCode> { KeyCode.F21 },
+                new List<KeyCode> { KeyCode.F21 },
                 false,
                 ButtonFlags.OEM3));
 
             this.OEMChords.Add(new KeyboardChord("Custom Key Top Left",
-                new List<KeyCode> { KeyCode.F21 },
-                new List<KeyCode> { KeyCode.F21 },
+                new List<KeyCode> { KeyCode.F22 },
+                new List<KeyCode> { KeyCode.F22 },
                 false,
                 ButtonFlags.OEM4));
 
