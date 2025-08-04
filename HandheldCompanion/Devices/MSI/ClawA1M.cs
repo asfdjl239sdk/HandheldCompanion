@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-﻿using HandheldCompanion.Extensions;
-=======
 ﻿using HandheldCompanion.Devices.MSI;
 using HandheldCompanion.Extensions;
->>>>>>> upstream/main
 using HandheldCompanion.Inputs;
 using HandheldCompanion.Managers;
 using HandheldCompanion.Misc;
@@ -157,12 +153,6 @@ public class ClawA1M : IDevice
     protected const int PID_DINPUT = 0x1902;
     protected const int PID_TESTING = 0x1903;
 
-<<<<<<< HEAD
-    protected byte[] CLAW_SET_M1 = [0x0F, 0x00, 0x00, 0x3C, 0x21, 0x01, 0x00, 0x7A, 0x05, 0x01, 0x00, 0x00, 0x11, 0x00];
-    protected byte[] CLAW_SET_M2 = [0x0F, 0x00, 0x00, 0x3C, 0x21, 0x01, 0x01, 0x1F, 0x05, 0x01, 0x00, 0x00, 0x12, 0x00];
-
-=======
->>>>>>> upstream/main
     protected string MsIDCVarData = "DD96BAAF-145E-4F56-B1CF-193256298E99";
 
     protected int WmiMajorVersion;
@@ -170,10 +160,6 @@ public class ClawA1M : IDevice
 
     protected bool isNew_EC => WmiMajorVersion > 1;
 
-<<<<<<< HEAD
-    private bool _IsOpen = false;
-    public override bool IsOpen => _IsOpen;
-=======
     private bool ClawOpen = false;
     public override bool IsOpen => DeviceOpen && ClawOpen;
 
@@ -191,7 +177,6 @@ public class ClawA1M : IDevice
     protected int Firmware;
     public DeviceVersion? SupportedDevice => deviceVersions.FirstOrDefault(version => version.IsSupported(Firmware));
     public override bool IsSupported => SupportedDevice is not null && SupportedDevice?.Firmware != 0;
->>>>>>> upstream/main
 
     public ClawA1M()
     {
@@ -302,11 +287,8 @@ public class ClawA1M : IDevice
         if (!success)
             return false;
 
-<<<<<<< HEAD
-=======
         LogManager.LogInformation("Device Firmware: {0}", Firmware.ToString("X4"));
 
->>>>>>> upstream/main
         SetShiftMode(ShiftModeCalcType.Deactive);
 
         // OverBoost
@@ -338,15 +320,6 @@ public class ClawA1M : IDevice
         // make sure M1/M2 are recognized as buttons
         if (hidDevices.TryGetValue(INPUT_HID_ID, out HidDevice device))
         {
-<<<<<<< HEAD
-            device.Write(CLAW_SET_M1);
-            Thread.Sleep(300);
-            device.Write(CLAW_SET_M2);
-            Thread.Sleep(300);
-            SyncToROM();
-            Thread.Sleep(300);
-            SwitchMode(GamepadMode.MSI);
-=======
             device.Write(GetM12(true), 0, 64);
             Thread.Sleep(300);
             device.Write(GetM12(false), 0, 64);
@@ -354,16 +327,11 @@ public class ClawA1M : IDevice
             SyncToROM();
             Thread.Sleep(300);
             SwitchMode(gamepadMode);
->>>>>>> upstream/main
             Thread.Sleep(2000);
         }
 
         // set flag
-<<<<<<< HEAD
-        _IsOpen = true;
-=======
         ClawOpen = true;
->>>>>>> upstream/main
 
         // prepare WMI
         GetWMI();
@@ -399,62 +367,6 @@ public class ClawA1M : IDevice
         }
 
         Device_Inserted();
-    }
-
-    private void QueryPowerProfile()
-    {
-        // manage events
-        ManagerFactory.powerProfileManager.Applied += PowerProfileManager_Applied;
-
-        PowerProfileManager_Applied(ManagerFactory.powerProfileManager.GetCurrent(), UpdateSource.Background);
-    }
-
-    private void PowerProfileManager_Initialized()
-    {
-        QueryPowerProfile();
-    }
-
-    private void PowerProfileManager_Applied(PowerProfile profile, UpdateSource source)
-    {
-        if (profile.FanProfile.fanMode != FanMode.Hardware)
-        {
-            byte[] fanTable = new byte[7];
-            fanTable[0] = (byte)profile.FanProfile.fanSpeeds[4];
-            fanTable[1] = (byte)profile.FanProfile.fanSpeeds[1];
-            fanTable[2] = (byte)profile.FanProfile.fanSpeeds[2];
-            fanTable[3] = (byte)profile.FanProfile.fanSpeeds[4];
-            fanTable[4] = (byte)profile.FanProfile.fanSpeeds[6];
-            fanTable[5] = (byte)profile.FanProfile.fanSpeeds[8];
-            fanTable[6] = (byte)profile.FanProfile.fanSpeeds[10];
-
-            // update fan table
-            SetFanTable(fanTable);
-        }
-
-        // MSI Center, API_UserScenario
-        bool IsDcMode = SystemInformation.PowerStatus.PowerLineStatus == PowerLineStatus.Offline;
-        if (profile.Guid == BetterBatteryGuid)
-        {
-            SetShiftMode(ShiftModeCalcType.ChangeToCurrentShiftType, IsDcMode ? ShiftType.None : ShiftType.ECO);
-            setEGControlMode(EnduranceGamingControl.Auto, EnduranceGamingMode.MaximumBattery);
-        }
-        else if (profile.Guid == BetterPerformanceGuid)
-        {
-            SetShiftMode(ShiftModeCalcType.ChangeToCurrentShiftType, IsDcMode ? ShiftType.None : ShiftType.GreenMode);
-            setEGControlMode(EnduranceGamingControl.Off, EnduranceGamingMode.MaximumBattery);
-        }
-        else if (profile.Guid == BestPerformanceGuid)
-        {
-            SetShiftMode(ShiftModeCalcType.ChangeToCurrentShiftType, IsDcMode ? ShiftType.None : ShiftType.SportMode);
-            setEGControlMode(EnduranceGamingControl.Off, EnduranceGamingMode.MaximumBattery);
-        }
-        else
-        {
-            SetShiftMode(ShiftModeCalcType.ChangeToCurrentShiftType, IsDcMode ? ShiftType.None : ShiftType.SportMode);
-            setEGControlMode(EnduranceGamingControl.Off, EnduranceGamingMode.Performance);
-        }
-
-        SetFanControl(profile.FanProfile.fanMode != FanMode.Hardware);
     }
 
     private void QueryPowerProfile()
@@ -588,11 +500,7 @@ public class ClawA1M : IDevice
         hidDevices.Clear();
 
         // set flag
-<<<<<<< HEAD
-        _IsOpen = false;
-=======
         ClawOpen = false;
->>>>>>> upstream/main
 
         // manage events
         ControllerManager.ControllerPlugged -= ControllerManager_ControllerPlugged;
@@ -738,11 +646,7 @@ public class ClawA1M : IDevice
         if (hidDevices.TryGetValue(INPUT_HID_ID, out HidDevice device))
         {
             byte[] msg = { 15, 0, 0, 60, (byte)CommandType.SyncToROM };
-<<<<<<< HEAD
-            if (device.Write(msg))
-=======
             if (device.Write(msg, 0, 64))
->>>>>>> upstream/main
             {
                 LogManager.LogInformation("Successfully synced to ROM");
                 return true;
@@ -839,8 +743,6 @@ public class ClawA1M : IDevice
         return data.ToArray();
     }
 
-<<<<<<< HEAD
-=======
     private byte[] GetM12(bool useM1)
     {
         // grab the right array (or null if no device)
@@ -867,7 +769,6 @@ public class ClawA1M : IDevice
         };
     }
 
->>>>>>> upstream/main
     private void Device_Removed()
     {
         // close device
@@ -876,12 +777,7 @@ public class ClawA1M : IDevice
             device.Removed -= Device_Removed;
 
             device.MonitorDeviceEvents = false;
-<<<<<<< HEAD
-            device.CloseDevice();
-            device.Dispose();
-=======
             try { device.Dispose(); } catch { }
->>>>>>> upstream/main
         }
     }
 

@@ -168,12 +168,6 @@
 
             <!--  Quick start  -->
             <TextBlock Style="{StaticResource BaseTextBlockStyle}" Text="Quick start" />
-<<<<<<< HEAD
-            <ikw:SimpleStackPanel Spacing="3">
-
-                <ItemsControl
-                    ItemsSource="{Binding Profiles}"
-=======
             <Grid>
                 <Grid.ColumnDefinitions>
                     <!--  main grid of 6 items  -->
@@ -186,24 +180,15 @@
                 <ItemsControl
                     Grid.Column="0"
                     ItemsSource="{Binding PagedProfiles}"
->>>>>>> upstream/main
                     VirtualizingPanel.IsVirtualizing="True"
                     VirtualizingPanel.VirtualizationMode="Recycling">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-<<<<<<< HEAD
-                            <UniformGrid Columns="5" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-
-                    <ItemsControl.ItemTemplate>
-=======
                             <UniformGrid Columns="4" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <!--  your existing profile-button template  -->
->>>>>>> upstream/main
                         <DataTemplate>
                             <Button
                                 Margin="3"
@@ -245,10 +230,6 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-<<<<<<< HEAD
-            </ikw:SimpleStackPanel>
-
-=======
 
                 <ui:PipsPager
                     Grid.Column="1"
@@ -262,7 +243,6 @@
                     SelectedPageIndex="{Binding SelectedPageIndex, Mode=TwoWay}" />
             </Grid>
 
->>>>>>> upstream/main
             <!--  Processes  -->
             <TextBlock Style="{StaticResource BaseTextBlockStyle}" Text="Processes" />
             <ikw:SimpleStackPanel Spacing="3">

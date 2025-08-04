@@ -58,11 +58,7 @@ public class ProcessManager : IManager
     private static readonly ConcurrentDictionary<int, ProcessEx> Processes = new();
 
     private static ProcessEx currentProcess;
-<<<<<<< HEAD
-    private IntPtr foregroundWindow;
-=======
     private IntPtr currenthWnd;
->>>>>>> upstream/main
 
     private AutomationEventHandler _windowOpenedHandler;
 
@@ -118,26 +114,16 @@ public class ProcessManager : IManager
         {
             case "QuickTools":
                 {
-<<<<<<< HEAD
-                    Profile currentProfile = ManagerFactory.profileManager.GetProfileFromPath(currentProcess.Path, false);
-                    if (!currentProfile.SuspendOnQT || currentProfile.Default)
-                        return;
-
-=======
->>>>>>> upstream/main
                     // we already have a suspended process
                     if (processHandle != IntPtr.Zero)
                         return;
 
                     if (currentProcess is not null)
                     {
-<<<<<<< HEAD
-=======
                         Profile currentProfile = ManagerFactory.profileManager.GetProfileFromPath(currentProcess.Path, false);
                         if (!currentProfile.SuspendOnQT || currentProfile.Default)
                             return;
 
->>>>>>> upstream/main
                         bool success = SuspendProcess(currentProcess.Handle, currentProcess.ProcessId);
                         if (success)
                         {

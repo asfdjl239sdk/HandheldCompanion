@@ -1,4 +1,3 @@
-using HandheldCompanion.Devices.AYANEO;
 using HandheldCompanion.Helpers;
 using HandheldCompanion.Inputs;
 using HandheldCompanion.Managers;
@@ -250,14 +249,11 @@ public abstract class IDevice
             return false;
         }
 
-<<<<<<< HEAD
-=======
         return true;
     }
 
     public virtual void OpenEvents()
     {
->>>>>>> upstream/main
         // raise events
         switch (ManagerFactory.settingsManager.Status)
         {
@@ -270,8 +266,6 @@ public abstract class IDevice
                 break;
         }
 
-<<<<<<< HEAD
-=======
         switch (ManagerFactory.deviceManager.Status)
         {
             default:
@@ -283,7 +277,6 @@ public abstract class IDevice
                 break;
         }
 
->>>>>>> upstream/main
         // manage events
         VirtualManager.ControllerSelected += VirtualManager_ControllerSelected;
 
@@ -322,20 +315,6 @@ public abstract class IDevice
         QuerySettings();
     }
 
-    protected virtual void QuerySettings()
-    {
-        // manage events
-        ManagerFactory.settingsManager.SettingValueChanged += SettingsManager_SettingValueChanged;
-    }
-
-    protected virtual void SettingsManager_SettingValueChanged(string name, object value, bool temporary)
-    { }
-
-    protected virtual void SettingsManager_Initialized()
-    {
-        QuerySettings();
-    }
-
     public virtual void Close()
     {
         // disable fan control
@@ -348,12 +327,9 @@ public abstract class IDevice
             openLibSys = null;
         }
 
-<<<<<<< HEAD
-=======
         // set flag
         DeviceOpen = false;
 
->>>>>>> upstream/main
         ManagerFactory.settingsManager.SettingValueChanged -= SettingsManager_SettingValueChanged;
         ManagerFactory.settingsManager.Initialized -= SettingsManager_Initialized;
         VirtualManager.ControllerSelected -= VirtualManager_ControllerSelected;
@@ -525,9 +501,6 @@ public abstract class IDevice
                             break;
                         case "FLIP DS":
                             device = new AYANEOFlipDS();
-                            break;
-                        case "AYANEO 3":
-                            device = new AYANEO3();
                             break;
                     }
                 }
@@ -1089,7 +1062,6 @@ public abstract class IDevice
         return false;
     }
 
-   
     public static IEnumerable<HidDevice> GetHidDevices(int vendorId, int[] deviceIds, int minFeatures = 1)
     {
         HidDevice[] HidDeviceList = HidDevices.Enumerate(vendorId, deviceIds).ToArray();
@@ -1097,7 +1069,7 @@ public abstract class IDevice
             if (device.IsConnected && device.Capabilities.FeatureReportByteLength >= minFeatures)
                 yield return device;
     }
-    
+
     public static IEnumerable<HidDevice> GetHidDevices(int vendorId, int deviceId, int minFeatures = 1)
     {
         return GetHidDevices(vendorId, new int[] { deviceId }, minFeatures);

@@ -319,11 +319,6 @@ public class LegionGo : IDevice
                 QueryPowerProfile();
                 break;
         }
-<<<<<<< HEAD
-
-        return true;
-=======
->>>>>>> upstream/main
     }
 
     private object controllerLock = new();

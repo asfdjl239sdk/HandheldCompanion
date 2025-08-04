@@ -539,11 +539,6 @@ public partial class MainWindow : GamepadWindow
                         InputsManager.Start();
                         TimerManager.Start();
                         SensorsManager.Resume(true);
-<<<<<<< HEAD
-                        ManagerFactory.gpuManager.Resume();
-                        ManagerFactory.processManager.Resume();
-=======
->>>>>>> upstream/main
                         PerformanceManager.Resume(true);
 
                         ManagerFactory.Resume();
@@ -593,13 +588,8 @@ public partial class MainWindow : GamepadWindow
                         overlayquickTools.SetVisibility(Visibility.Collapsed);
 
                         // suspend manager(s)
-<<<<<<< HEAD
-                        ManagerFactory.gpuManager.Stop();
-                        ManagerFactory.processManager.Suspend();
-=======
                         ManagerFactory.Suspend();
 
->>>>>>> upstream/main
                         VirtualManager.Suspend(true);
                         ControllerManager.Suspend(true);
                         TimerManager.Stop();

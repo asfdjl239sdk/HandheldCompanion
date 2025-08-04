@@ -93,16 +93,6 @@ namespace HandheldCompanion.Devices.AYANEO
                 this.CEcControl_RgbHoldControl();
             }
 
-<<<<<<< HEAD
-            // manage events
-            PowerManager.RemainingChargePercentChanged += PowerManager_RemainingChargePercentChanged;
-
-            return true;
-        }
-
-        protected override void QuerySettings()
-        {
-=======
             return true;
         }
 
@@ -116,7 +106,6 @@ namespace HandheldCompanion.Devices.AYANEO
 
         protected override void QuerySettings()
         {
->>>>>>> upstream/main
             // raise events
             SettingsManager_SettingValueChanged("BatteryChargeLimit", ManagerFactory.settingsManager.GetString("BatteryChargeLimit"), false);
 

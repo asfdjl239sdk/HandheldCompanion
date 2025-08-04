@@ -53,8 +53,6 @@ namespace HandheldCompanion.Managers
             gpuManager = new() { SuspendWithOS = true };
             notificationManager = new();
             libraryManager = new();
-<<<<<<< HEAD
-=======
         }
 
         public static void Resume()
@@ -67,7 +65,6 @@ namespace HandheldCompanion.Managers
         {
             foreach (IManager manager in Managers.Where(m => m.SuspendWithOS))
                 manager.Suspend();
->>>>>>> upstream/main
         }
     }
 }

@@ -200,30 +200,6 @@ public class ROGAlly : IDevice
         if (!success)
             return false;
 
-<<<<<<< HEAD
-        // manage events
-        ControllerManager.ControllerPlugged += ControllerManager_ControllerPlugged;
-        ControllerManager.ControllerUnplugged += ControllerManager_ControllerUnplugged;
-
-        Device_Inserted();
-
-        return true;
-    }
-
-    private void ControllerManager_ControllerPlugged(Controllers.IController Controller, bool IsPowerCycling)
-    {
-        if (Controller.GetVendorID() == vendorId && productIds.Contains(Controller.GetProductID()))
-            Device_Inserted(true);
-    }
-
-    private void ControllerManager_ControllerUnplugged(Controllers.IController Controller, bool IsPowerCycling, bool WasTarget)
-    {
-        // hack, force rescan
-        if (Controller.GetVendorID() == vendorId && productIds.Contains(Controller.GetProductID()))
-            Device_Removed();
-    }
-
-=======
         return true;
     }
 
@@ -251,7 +227,6 @@ public class ROGAlly : IDevice
             Device_Removed();
     }
 
->>>>>>> upstream/main
     private bool IsReading = false;
 
     private void Device_Removed()
@@ -261,12 +236,7 @@ public class ROGAlly : IDevice
             device.Removed -= Device_Removed;
 
             device.MonitorDeviceEvents = false;
-<<<<<<< HEAD
-            device.CloseDevice();
-            device.Dispose();
-=======
             try { device.Dispose(); } catch { }            
->>>>>>> upstream/main
         }
 
         // stop further reads
@@ -592,27 +562,6 @@ public class ROGAlly : IDevice
 
     private void ConfigureController(bool Remap)
     {
-<<<<<<< HEAD
-        SendHidControlWrite(modeGame);
-        SendHidControlWrite(dPadUpDownDefault);
-        SendHidControlWrite(dPadLeftRightDefault);
-        SendHidControlWrite(joySticksDefault);
-        SendHidControlWrite(shoulderButtonsDefault);
-        SendHidControlWrite(faceButtonsABDefault);
-        SendHidControlWrite(faceButtonsXYDefault);
-        SendHidControlWrite(viewAndMenuDefault);
-        SendHidControlWrite(Remap ? M1F18M2F17 : M1M2Default);
-
-        SendHidControlWrite(commitReset1of4);
-        SendHidControlWrite(commitReset2of4);
-        SendHidControlWrite(commitReset3of4);
-        SendHidControlWrite(commitReset4of4);
-    }
-
-    public void SendHidControlWrite(byte[] data)
-    {
-=======
->>>>>>> upstream/main
         if (hidDevices.TryGetValue(INPUT_HID_ID, out HidDevice device))
         {
             if (!device.IsConnected)

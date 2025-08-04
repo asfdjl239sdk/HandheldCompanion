@@ -20,8 +20,6 @@ public class DClawController : DInputController
         }
     }
 
-<<<<<<< HEAD
-=======
     public byte FeedbackLargeMotor;
     public byte FeedbackSmallMotor;
 
@@ -29,7 +27,6 @@ public class DClawController : DInputController
     private bool rumbleThreadRunning;
     private int rumbleThreadInterval = 10;
 
->>>>>>> upstream/main
     public DClawController() : base()
     { }
 
@@ -151,18 +148,12 @@ public class DClawController : DInputController
         catch (SharpDX.SharpDXException ex)
         {
             if (ex.ResultCode == ResultCode.NotAcquired)
-<<<<<<< HEAD
-                if (IsPlugged) Plug();
-                else if (ex.ResultCode == ResultCode.InputLost)
-                    AttachDetails(Details);
-=======
             {
                 if (IsPlugged)
                     Plug();
             }
             else if (ex.ResultCode == ResultCode.InputLost)
                 AttachDetails(Details);
->>>>>>> upstream/main
         }
 
         base.UpdateInputs(ticks, delta);
@@ -190,12 +181,8 @@ public class DClawController : DInputController
         joystickHid?.Write(new byte[]
         {
             05, 01, 00, 00,
-<<<<<<< HEAD
-            (byte)(SmallMotor * VibrationStrength), (byte)(LargeMotor * VibrationStrength),
-=======
             (byte)(SmallMotor * VibrationStrength),
             (byte)(LargeMotor * VibrationStrength),
->>>>>>> upstream/main
             00,
             00,
             00,
