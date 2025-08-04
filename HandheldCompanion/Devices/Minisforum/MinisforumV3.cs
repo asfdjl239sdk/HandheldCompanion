@@ -88,11 +88,17 @@ public class MinisforumV3 : IDevice
         });
     }
 
+<<<<<<< HEAD
     public override bool Open()
     {
         var success = base.Open();
         if (!success)
             return false;
+=======
+    public override void OpenEvents()
+    {
+        base.OpenEvents();
+>>>>>>> upstream/main
 
         // raise events
         switch (ManagerFactory.powerProfileManager.Status)
@@ -105,8 +111,11 @@ public class MinisforumV3 : IDevice
                 QueryPowerProfile();
                 break;
         }
+<<<<<<< HEAD
 
         return true;
+=======
+>>>>>>> upstream/main
     }
 
     public override void Close()

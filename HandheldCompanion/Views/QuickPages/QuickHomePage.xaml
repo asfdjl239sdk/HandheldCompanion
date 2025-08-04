@@ -41,7 +41,11 @@
 
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
+<<<<<<< HEAD
                             <UniformGrid Columns="4" />
+=======
+                            <UniformGrid Columns="3" />
+>>>>>>> upstream/main
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
 

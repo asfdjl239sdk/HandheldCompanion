@@ -84,12 +84,16 @@ namespace HandheldCompanion.Devices.AYANEO
 
         public override bool Open()
         {
-            if (!base.Open()) return false;
+            bool success = base.Open();
+            if (!success)
+                return false;
+
             lock (this.updateLock)
             {
                 this.CEcControl_RgbHoldControl();
             }
 
+<<<<<<< HEAD
             // manage events
             PowerManager.RemainingChargePercentChanged += PowerManager_RemainingChargePercentChanged;
 
@@ -98,6 +102,21 @@ namespace HandheldCompanion.Devices.AYANEO
 
         protected override void QuerySettings()
         {
+=======
+            return true;
+        }
+
+        public override void OpenEvents()
+        {
+            base.OpenEvents();
+
+            // manage events
+            PowerManager.RemainingChargePercentChanged += PowerManager_RemainingChargePercentChanged;
+        }
+
+        protected override void QuerySettings()
+        {
+>>>>>>> upstream/main
             // raise events
             SettingsManager_SettingValueChanged("BatteryChargeLimit", ManagerFactory.settingsManager.GetString("BatteryChargeLimit"), false);
 

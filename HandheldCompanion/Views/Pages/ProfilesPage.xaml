@@ -761,7 +761,10 @@
                                             Grid.Column="1"
                                             Margin="12,0,0,0"
                                             d:Visibility="Visible"
+<<<<<<< HEAD
                                            
+=======
+>>>>>>> upstream/main
                                             Visibility="{Binding ElementName=RSRToggle, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
 
                                             <TextBox
@@ -966,7 +969,10 @@
                                             Grid.Column="1"
                                             Margin="12,0,0,0"
                                             d:Visibility="Visible"
+<<<<<<< HEAD
                                            
+=======
+>>>>>>> upstream/main
                                             Visibility="{Binding ElementName=RISToggle, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
 
                                             <TextBox
@@ -1203,10 +1209,14 @@
                                                     TextWrapping="Wrap" />
                                             </StackPanel>
 
+<<<<<<< HEAD
                                             <DockPanel
                                                 Grid.Column="1"
                                                 Margin="12,0,0,0"
                                                >
+=======
+                                            <DockPanel Grid.Column="1" Margin="12,0,0,0">
+>>>>>>> upstream/main
                                                 <TextBox
                                                     Height="31"
                                                     HorizontalAlignment="Right"
@@ -1252,10 +1262,14 @@
                                                     TextWrapping="Wrap" />
                                             </StackPanel>
 
+<<<<<<< HEAD
                                             <DockPanel
                                                 Grid.Column="1"
                                                 Margin="12,0,0,0"
                                                >
+=======
+                                            <DockPanel Grid.Column="1" Margin="12,0,0,0">
+>>>>>>> upstream/main
                                                 <TextBox
                                                     Height="31"
                                                     HorizontalAlignment="Right"

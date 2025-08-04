@@ -3,6 +3,7 @@ using HandheldCompanion.Inputs;
 using HandheldCompanion.Managers;
 using HandheldCompanion.Utils;
 using SharpDX.DirectInput;
+using System.Threading;
 
 namespace HandheldCompanion.Controllers;
 
@@ -19,6 +20,16 @@ public class DClawController : DInputController
         }
     }
 
+<<<<<<< HEAD
+=======
+    public byte FeedbackLargeMotor;
+    public byte FeedbackSmallMotor;
+
+    private Thread rumbleThread;
+    private bool rumbleThreadRunning;
+    private int rumbleThreadInterval = 10;
+
+>>>>>>> upstream/main
     public DClawController() : base()
     { }
 
@@ -37,14 +48,53 @@ public class DClawController : DInputController
 
     public override void Plug()
     {
+        // exclusive to ClawA1M
+        if (IDevice.GetCurrent().GetType() == typeof(ClawA1M))
+        {
+            // manage rumble thread
+            rumbleThreadRunning = true;
+            rumbleThread = new Thread(RumbleThreadLoop)
+            {
+                IsBackground = true,
+                Priority = ThreadPriority.Highest
+            };
+            rumbleThread.Start();
+        }
+
         TimerManager.Tick += UpdateInputs;
         base.Plug();
     }
 
     public override void Unplug()
     {
+        // exclusive to ClawA1M
+        if (IDevice.GetCurrent().GetType() == typeof(ClawA1M))
+        {
+            // kill rumble thread
+            if (rumbleThread is not null)
+            {
+                rumbleThreadRunning = false;
+                // Ensure the thread has finished execution
+                if (rumbleThread.IsAlive)
+                    rumbleThread.Join(3000);
+                rumbleThread = null;
+            }
+        }
+
         TimerManager.Tick -= UpdateInputs;
         base.Unplug();
+    }
+
+    private async void RumbleThreadLoop(object? obj)
+    {
+        while (rumbleThreadRunning)
+        {
+            byte largeVal = (byte)(FeedbackLargeMotor != 0 ? 193 : 0);
+            byte smallVal = (byte)(FeedbackSmallMotor != 0 ? 193 : 0);
+            WriteVibration(largeVal, smallVal);
+
+            Thread.Sleep(rumbleThreadInterval);
+        }
     }
 
     public override void UpdateInputs(long ticks, float delta)
@@ -101,9 +151,18 @@ public class DClawController : DInputController
         catch (SharpDX.SharpDXException ex)
         {
             if (ex.ResultCode == ResultCode.NotAcquired)
+<<<<<<< HEAD
                 if (IsPlugged) Plug();
                 else if (ex.ResultCode == ResultCode.InputLost)
                     AttachDetails(Details);
+=======
+            {
+                if (IsPlugged)
+                    Plug();
+            }
+            else if (ex.ResultCode == ResultCode.InputLost)
+                AttachDetails(Details);
+>>>>>>> upstream/main
         }
 
         base.UpdateInputs(ticks, delta);
@@ -111,13 +170,32 @@ public class DClawController : DInputController
 
     public override void SetVibration(byte LargeMotor, byte SmallMotor)
     {
+
+        if (IDevice.GetCurrent().GetType() == typeof(ClawA1M))
+        {
+            this.FeedbackLargeMotor = LargeMotor;
+            this.FeedbackSmallMotor = SmallMotor;
+        }
+        else
+        {
+            WriteVibration(LargeMotor, SmallMotor);
+        }
+    }
+
+    private void WriteVibration(byte LargeMotor, byte SmallMotor)
+    {
         if (!IsConnected())
             return;
 
         joystickHid?.Write(new byte[]
         {
             05, 01, 00, 00,
+<<<<<<< HEAD
             (byte)(SmallMotor * VibrationStrength), (byte)(LargeMotor * VibrationStrength),
+=======
+            (byte)(SmallMotor * VibrationStrength),
+            (byte)(LargeMotor * VibrationStrength),
+>>>>>>> upstream/main
             00,
             00,
             00,

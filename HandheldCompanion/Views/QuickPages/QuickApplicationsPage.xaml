@@ -168,19 +168,42 @@
 
             <!--  Quick start  -->
             <TextBlock Style="{StaticResource BaseTextBlockStyle}" Text="Quick start" />
+<<<<<<< HEAD
             <ikw:SimpleStackPanel Spacing="3">
 
                 <ItemsControl
                     ItemsSource="{Binding Profiles}"
+=======
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <!--  main grid of 6 items  -->
+                    <ColumnDefinition Width="*" />
+                    <!--  pager on the right  -->
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!--  paged 6-item layout  -->
+                <ItemsControl
+                    Grid.Column="0"
+                    ItemsSource="{Binding PagedProfiles}"
+>>>>>>> upstream/main
                     VirtualizingPanel.IsVirtualizing="True"
                     VirtualizingPanel.VirtualizationMode="Recycling">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
+<<<<<<< HEAD
                             <UniformGrid Columns="5" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
 
                     <ItemsControl.ItemTemplate>
+=======
+                            <UniformGrid Columns="4" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <!--  your existing profile-button template  -->
+>>>>>>> upstream/main
                         <DataTemplate>
                             <Button
                                 Margin="3"
@@ -191,10 +214,8 @@
                                 CacheMode="BitmapCache"
                                 Command="{Binding StartProcessCommand}"
                                 IsEnabled="{Binding IsAvailable, UpdateSourceTrigger=PropertyChanged}">
-
                                 <ikw:SimpleStackPanel
                                     Margin="0,6,0,0"
-                                    HorizontalAlignment="Stretch"
                                     Orientation="Vertical"
                                     Spacing="3">
                                     <Image
@@ -211,7 +232,6 @@
                                             </Style>
                                         </Image.Style>
                                     </Image>
-
                                     <TextBlock
                                         Height="40"
                                         HorizontalAlignment="Center"
@@ -225,8 +245,24 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+<<<<<<< HEAD
             </ikw:SimpleStackPanel>
 
+=======
+
+                <ui:PipsPager
+                    Grid.Column="1"
+                    Margin="12,0,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    NextButtonVisibility="Visible"
+                    NumberOfPages="{Binding TotalPages}"
+                    Orientation="Vertical"
+                    PreviousButtonVisibility="Visible"
+                    SelectedPageIndex="{Binding SelectedPageIndex, Mode=TwoWay}" />
+            </Grid>
+
+>>>>>>> upstream/main
             <!--  Processes  -->
             <TextBlock Style="{StaticResource BaseTextBlockStyle}" Text="Processes" />
             <ikw:SimpleStackPanel Spacing="3">

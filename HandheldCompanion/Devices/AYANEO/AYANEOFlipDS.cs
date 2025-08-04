@@ -28,7 +28,35 @@ public class AYANEOFlipDS : AYANEOFlipKB
             [KeyCode.F18, KeyCode.LWin, KeyCode.RControlKey],
             false, ButtonFlags.OEM5
         ));
+    }
 
+    public override void Initialize(bool FirstStart, bool NewUpdate)
+    {
+        if (FirstStart)
+        {
+            // set Quicktools to Maximize on bottom screen
+            ManagerFactory.settingsManager.SetProperty("QuickToolsLocation", 2);
+            ManagerFactory.settingsManager.SetProperty("QuickToolsDeviceName", "AYANEOQHD");
+        }
+
+        if (NewUpdate)
+        {
+            string currentVersion = MainWindow.CurrentVersion.ToString();
+            switch (currentVersion)
+            {
+                case "0.24.0.13":
+                    ManagerFactory.settingsManager.SetProperty("QuickKeyboardVisibility", "True");
+                    ManagerFactory.settingsManager.SetProperty("QuickTrackpadVisibility", "True");
+                    break;
+            }
+        }
+    }
+
+    public override void OpenEvents()
+    {
+        base.OpenEvents();
+
+        // manage events
         ControllerManager.InputsUpdated += ControllerManager_InputsUpdated;
     }
 
