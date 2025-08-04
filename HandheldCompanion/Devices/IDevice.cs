@@ -1,3 +1,4 @@
+using HandheldCompanion.Devices.AYANEO;
 using HandheldCompanion.Helpers;
 using HandheldCompanion.Inputs;
 using HandheldCompanion.Managers;
@@ -501,6 +502,9 @@ public abstract class IDevice
                             break;
                         case "FLIP DS":
                             device = new AYANEOFlipDS();
+                            break;
+                        case "AYANEO 3":
+                            device = new AYANEO3();
                             break;
                     }
                 }
